@@ -1,27 +1,20 @@
 //Created by Wang Lin
 //Contact me by wanglin193 at gmail
 
-#include "facedetect-dll.h"
+#include "HeadPose.h"
+#include "facedetect-dll.h" 
+
+using namespace cv;
 
 namespace YuShiqiLibFace
 {
-
-struct FaceInfo
-{
-	cv::Rect rectFace;
-	int nNeighbors;
-	int nAngle;
-	cv::Point2i ptLmk[68];
-};
-	
 enum {	Frontal, FrontalSurveillance, Multiview, MultiviewReinforce };
 
 class FaceDetectAlignment
 {
-
 //define the buffer size. Do not change the size!
 #define DETECT_BUFFER_SIZE 0x20000
- 
+
 private:
 	unsigned char * pBuffer;
 	int * pResults; 
@@ -29,14 +22,17 @@ private:
 	bool bDoLandmark;
 	int nLmk;
 
-public:
-	std::vector<FaceInfo> vFaceInfo;
+	float fScale;// = 1.2f;
+	int nMinSize;// = 48; 
 
-	FaceDetectAlignment(bool bDoLandmark_,int nLmk_):bDoLandmark(true),nLmk(68)
+public:
+	std::vector<HeadPose> vFaceInfo;
+
+	FaceDetectAlignment( bool bDoLandmark_,int nLmk_ ):bDoLandmark(true),nLmk(68),fScale(1.2f),nMinSize(48)
 	{
 		bDoLandmark = bDoLandmark_;
 		nLmk = nLmk_;
-		vFaceInfo.clear();
+		vFaceInfo.clear(); 
 	}
 	
 	int init( bool bDoLandmark_, int method )
@@ -57,7 +53,8 @@ public:
 		return 0;
 	}
 	
-	void setFDMethod( int method ) { mMethod = method; 	}
+	void setFDMethod( int method ) { mMethod = method; }
+	void setMinSize( int nSize ) { nMinSize = nSize; };
 
 	int run( cv::Mat gray )
 	{
@@ -65,10 +62,8 @@ public:
 		int nWid = gray.cols;
 		int nHei = gray.rows;
 		int nStep = (int)gray.step;
-		float fScale = 1.2;
+ 
 		int nMinNeighbor = 2;
-		int nMinSize = 48;
-
 		switch( mMethod )
 		{
 		case Frontal:
@@ -95,19 +90,21 @@ public:
 
 		//parsing faces info
 		vFaceInfo.clear();
+		int offset = nLmk * 2 + 6;
 		for( int i=0; i<nNumFaces; i++ )
-		{
-			short * p = ((short*)(pResults+1))+142*i; 
+		{ 
+			short * p = ((short*)(pResults+1))+offset*i; 
  
-			FaceInfo face;
+			HeadPose face;
+			face.numLmk = nLmk;
 			face.rectFace = cvRect(p[0],p[1],p[2],p[3]);
-			face.nNeighbors = p[4];
-			face.nAngle = p[5];
+			//face.nNeighbors = p[4];
+			//face.nAngle = p[5];
 
 			if (bDoLandmark)
 			{
 				for (int j = 0; j < nLmk; j++)
-					face.ptLmk[j] =  cv::Point2i((int)p[6 + 2 * j], (int)p[6 + 2 * j + 1]);
+					face.ptLmk[j] =  cv::Point2f((float)p[6 + 2 * j], (float)p[6 + 2 * j + 1]);
 			}
 			vFaceInfo.push_back(face);
 		}
@@ -119,24 +116,7 @@ public:
 		 //release the buffer
 		free(pBuffer);
 		vFaceInfo.clear();
-	}
-	
-	//draw results on canvas
-	void draw( cv::Mat image  )
-	{
-		for( int i=0;i<vFaceInfo.size();i++ )
-		{
-			rectangle(image, vFaceInfo[i].rectFace, cv::Scalar(0, 255, 0), 2);
-
-			for ( int j = 0; j < nLmk; j++ )
-			{
-				cv::Point2i p = vFaceInfo[i].ptLmk[j];
-				cv::circle(image, p, 1, cv::Scalar(0, 255, 0),2);	
-
-			//	cv::putText(image, std::to_string((long long)j), p, cv::FONT_HERSHEY_DUPLEX, 0.4, cv::Scalar(255,255,255));
-			}
-		}
-	}
+	} 
 
 };
 

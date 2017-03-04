@@ -22,6 +22,7 @@
     <ClCompile Include="src\mainHeadpose.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="include\HeadPose.h" />
     <ClInclude Include="include\libfaceInterface.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

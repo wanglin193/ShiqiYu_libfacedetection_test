@@ -9,6 +9,7 @@
 #pragma comment(lib,"opencv_highgui249.lib")
 #pragma comment(lib,"opencv_core249.lib")
 #pragma comment(lib,"opencv_imgproc249.lib")
+#pragma comment(lib,"opencv_calib3d249.lib")
 
 //#pragma comment(lib,"libfacedetect.lib")
 #pragma comment(lib,"libfacedetect-x64.lib")
@@ -20,14 +21,16 @@ std::string strName[4] = { "Frontal", "FrontalSurveillance", "Multiview", "Multi
 
 int main(int argc, char* argv[])
 { 
+	cv::Mat MatK = (Mat_<float>(3,3)<<500,0,320,0,500,240,0,0,1);
 	//define
 	Mat image,imcanvas;
 	Mat gray;
 	VideoCapture capture;
-	FaceDetectAlignment FDA(true,68);
+	FaceDetectAlignment FDA( true, 68 );
 
 	//init
 	FDA.init(true,FrontalSurveillance);
+	FDA.setMinSize( 36 );
 	capture.open(0);
 
 	if( capture.isOpened() )
@@ -39,20 +42,32 @@ int main(int argc, char* argv[])
 			capture >> image;
 			if(image.empty())
 				break;
-			//resize(image,image,Size(),0.5,0.5,CV_INTER_LINEAR);
-			cvtColor(image, gray, CV_BGR2GRAY);
+			resize(image,image,Size(),0.5,0.5,CV_INTER_LINEAR);
+			MatK = (Mat_<float>(3,3)<<250,0,160,0,250,120,0,0,1); 
 
+			cvtColor(image, gray, CV_BGR2GRAY);
+		 
 			//4 methods
-			for( int i=0; i<4;i++ )
+			//for( int method = 0; method<4;method++ )
+			int method = 3;
 			{
-				FDA.setFDMethod(i);
-				int nFace = FDA.run(gray);
-				//printf("%d  face(s)  detected.\r",nFace);
+				FDA.setFDMethod( method ); 
+				int nFace = FDA.run(gray); 
 				
 				imcanvas = image.clone();
 				if( nFace>0 ) 
-					FDA.draw(imcanvas);
-				imshow(strName[i], imcanvas);
+				{
+					for(int j=0;j<nFace;j++)
+					{
+						FDA.vFaceInfo[j].drawResult(imcanvas);
+						FDA.vFaceInfo[j].solveHeadPose( MatK );
+						FDA.vFaceInfo[j].drawModelAxis( imcanvas,MatK );  	
+
+						//FDA.vFaceInfo[j].ProjectHeadModel( MatK );
+						//FDA.vFaceInfo[j].drawProjectHeadModel( imcanvas );
+					}
+				}
+				imshow(strName[method], imcanvas);
 			}
  
 			if(waitKey(10) == 27)
@@ -61,31 +76,39 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		image = imread("face.jpg"); 
+		image = imread("keliamoniz2.jpg"); 
 		if(image.empty())
 		{
 			std::cout<<"Need Web-cam or Image as input."<<std::endl;
 			return 0;
 		}
-		//resize(image,image,Size(),0.5,0.5,CV_INTER_LINEAR); 
-
 		cvtColor(image, gray, CV_BGR2GRAY);
 
 		//4 methods
-		for( int i=0; i<4;i++ )
+		for( int method = 0; method<4;method++ )
 		{
-			FDA.setFDMethod(i);
-			int nFace = FDA.run(gray);
-			//printf("%d  face(s)  detected.\n",nFace);
+			FDA.setFDMethod( method );
+			FDA.setMinSize( 36 );
+			int nFace = FDA.run(gray); 
 
 			imcanvas = image.clone();
 			if( nFace>0 ) 
-				FDA.draw(imcanvas);
-			imshow(strName[i], imcanvas);
+			{
+				printf("%d faces found.\n",nFace);
+				for(int j=0;j<nFace;j++)
+				{
+					FDA.vFaceInfo[j].drawResult(imcanvas);
+					FDA.vFaceInfo[j].solveHeadPose( MatK );
+					FDA.vFaceInfo[j].drawModelAxis( imcanvas,MatK );  	
+
+					//FDA.vFaceInfo[j].ProjectHeadModel( MatK );
+					//FDA.vFaceInfo[j].drawProjectHeadModel( imcanvas );
+				}
+			}
+			imshow(strName[method], imcanvas);
 		}
 		waitKey(0);
-	}
-
+	} 
 	//un-init
 	FDA.release();
 
