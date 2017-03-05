@@ -99,8 +99,9 @@ int main(int argc, char* argv[])
 				{
 					FDA.vFaceInfo[j].drawResult(imcanvas);
 					FDA.vFaceInfo[j].solveHeadPose( MatK );
-					FDA.vFaceInfo[j].drawModelAxis( imcanvas,MatK );  	
+					FDA.vFaceInfo[j].drawModelAxis( imcanvas,MatK );
 
+					//show lmks for pose estimation
 					//FDA.vFaceInfo[j].ProjectHeadModel( MatK );
 					//FDA.vFaceInfo[j].drawProjectHeadModel( imcanvas );
 				}
