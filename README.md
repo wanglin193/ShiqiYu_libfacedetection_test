@@ -8,14 +8,14 @@
 
 Face Alignment result:
 
-![image](https://github.com/wanglin193/libfacedetection_test/blob/master/snapshot1.png)
+![image](https://raw.githubusercontent.com/wanglin193/ShiqiYu_libfacedetection_test/master/snapshot1.png)
 
 
 Landmarks used for head pose estimation:
 
-![image](https://github.com/wanglin193/libfacedetection_test/blob/master/snapshot2.png)
+![image](https://raw.githubusercontent.com/wanglin193/ShiqiYu_libfacedetection_test/master/snapshot2.png)
 
 
 Multiple-face result:
 
-![image](https://github.com/wanglin193/libfacedetection_test/blob/master/snapshot3.png)
+![image](https://raw.githubusercontent.com/wanglin193/ShiqiYu_libfacedetection_test/master/snapshot3.png)
