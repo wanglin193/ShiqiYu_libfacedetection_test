@@ -1,9 +1,8 @@
 # Head Pose demo
 
 1. Face detetion and face alignment using ShiqiYu's face detection/alignment lib  
-2. 3D head pose by cv::solvePnp(), see 
-
-    [class HeadPose](https://github.com/wanglin193/ShiqiYu_libfacedetection_test/blob/master/include/HeadPose.h?ts=4)
+2. 3D head pose by cv::solvePnp(), see [class HeadPose](https://github.com/wanglin193/ShiqiYu_libfacedetection_test/blob/master/include/HeadPose.h?ts=4)
+3. Visual Studio 2010
 
 
 
